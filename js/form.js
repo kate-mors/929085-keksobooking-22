@@ -1,6 +1,6 @@
 import {sendData} from './api.js';
 import {TITLE_MAX_LENGTH, TITLE_MIN_LENGTH, PRICE_MAX, pricesPerNight, capacity} from './data.js';
-import {onSuccess, onFormSend, onScreenClick, onEscClick, onErrorButtonClick} from './on-event.js';
+import {checkResponse, onFormReset, showMessage} from './on-event.js';
 import {resetMainMarker} from './map.js';
 
 const mainBlock = document.querySelector('.promo');
@@ -14,9 +14,10 @@ const elementTitle = document.querySelector('#title');
 const elementRooms = document.querySelector('#room_number');
 const elementGuests = document.querySelector('#capacity');
 export const addressField = document.querySelector('#address');
-const successMessage = document.querySelector('#success').content.querySelector('.success');
-const errorMessage = document.querySelector('#error').content.querySelector('.error');
-export const errorButton = errorMessage.querySelector('.error__button');
+const successMessageTemplate = document.querySelector('#success').content.querySelector('.success');
+const successMessage = successMessageTemplate.cloneNode(true);
+const errorMessageTemplate = document.querySelector('#error').content.querySelector('.error');
+const errorMessage = errorMessageTemplate.cloneNode(true);
 
 const validateRoomsGuests = function () {
   const validateCapacity = capacity[elementRooms.selectedIndex].includes(elementGuests.selectedIndex)
@@ -85,19 +86,6 @@ const elementPriceInputHandler = function () {
   validatePrice();
 };
 
-const showSuccessMessage = function () {
-  mainBlock.appendChild(successMessage);
-  onScreenClick(successMessage);
-  onEscClick(successMessage);
-};
-
-const showErrorMessage = function () {
-  mainBlock.appendChild(errorMessage);
-  onScreenClick(errorMessage);
-  onEscClick(errorMessage);
-  onErrorButtonClick(errorMessage);
-};
-
 elementType.addEventListener('change', elementTypeChangeHandler);
 elementTimeIn.addEventListener('change', elementTimeInChangeHandler);
 elementTimeOut.addEventListener('change', elementTimeOutChangeHandler);
@@ -110,7 +98,7 @@ resetButton.addEventListener('click', function (evt) {
   evt.preventDefault();
   form.reset();
   resetMainMarker();
-  onFormSend();
+  onFormReset();
 });
 
 form.addEventListener('submit', (evt) => {
@@ -118,10 +106,10 @@ form.addEventListener('submit', (evt) => {
   const formData = new FormData(evt.target);
 
   sendData(formData)
-    .then(onSuccess)
+    .then(checkResponse)
+    .then(() => showMessage(mainBlock, successMessage))
+    .then(() => onFormReset())
     .then(() => form.reset())
     .then(() => resetMainMarker())
-    .then(() => onFormSend())
-    .then(() => showSuccessMessage())
-    .catch(() => showErrorMessage())
+    .catch(() => showMessage(mainBlock, errorMessage))
 });

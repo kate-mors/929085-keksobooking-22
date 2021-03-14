@@ -22,12 +22,12 @@ export const PRICE = {
 
 export const ROOMS = {
   min: 1,
-  max: 20,
+  max: 4,
 };
 
 export const GUESTS = {
-  min: 1,
-  max: 20,
+  min: 0,
+  max: 4,
 };
 
 export const TITLES_LIST = [
